@@ -190,7 +190,12 @@ bot.on('speak', function (data) {
     } else {
       bot.speak("We've got a Napolean on our hands here.");
     } 
-  } 
+  }
+  
+  if (text.match(/love the hoff/i)) {
+    bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
+  }
+  
 });
 
 bot.on('add_dj', function(data) {
