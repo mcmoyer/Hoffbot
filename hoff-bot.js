@@ -199,10 +199,10 @@ bot.on('add_dj', function(data) {
   dj_index = queue.indexOf(dj);
 
   if (queue.length > 0) {
-    if (dj_index > 0) {
+    if (dj_index == 0) {
       queue.splice(dj_index,1);
       bot.speak("Give it up for " + dj);
-    } else if (dj_index <= 0) {
+    } else {
       bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down")
     } 
   }
