@@ -9,8 +9,10 @@ var bop_responses = [
   "Can't a man finish a cheeseburger around here?",
   "Pamela Anderson didn't like it when I told her to bop",
   "Have you heard my version of 'La Isla Bonita'?  It's smooth",
-  "in German, that's 'bop Ihren Kopf'"
-];
+  "in German, that's 'bop Ihren Kopf'",
+  "Bopping brings out the sparkle in my chest hair"
+  
+  ];
 
 module.exports = bop_responses;
 
