@@ -71,6 +71,7 @@ bot.on('registered', function (data) {
   } else {
     bot.modifyProfile({name: "TheOneAndOnlyHoff"});
     bot.setAvatar(5);
+    bot.modifyLaptop('linux');
     fs.readFile("current_queue.json", function(err,data) {
       if (err)
         queue = [];
@@ -83,6 +84,7 @@ bot.on('registered', function (data) {
       if (data)
         motd = data.toString('utf8');
     });
+    bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
   }
   
 });
@@ -104,6 +106,13 @@ bot.on('speak', function (data) {
       } else {
         bot.speak("Hey KITT, we seem to have someone impersonating a moderator");
       }
+   }
+
+   if (text.match(/^\/reset motd/i)) {
+     if (isModerator(data.userid) ) {
+       motd = default_motd;
+       bot.speak("Done deal!");
+     } 
    }
 
    if (text.match(/^\/motd/)) {
@@ -232,6 +241,7 @@ bot.on('newsong', function (data) {
     bot.speak(song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
   }
+  console.dir(data.room.metadata.djs);
 });
 
 bot.on("rem_dj", function (data) {
