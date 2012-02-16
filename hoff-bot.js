@@ -146,6 +146,7 @@ bot.on('speak', function (data) {
     } else {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
+      bot.speak(current_queue());
     }
   }
  
@@ -207,6 +208,10 @@ bot.on('speak', function (data) {
  
   if (text.match(/manners hoff/i)) {
     bot.speak("Hey new DJs, just as a heads up, typically when people play songs that fit a theme (and especially if you're dj'ing) it's nice to awesome other people's songs. It's friendly, lets people know you're not afk, and encourages folks to awesome your songs, too.");
+  }
+
+  if (text.match(/open the pod bay doors hoff/i)) {
+    bot.speak("I'm sorry " + name + ", I'm afraid I can't do that."); 
   }
 });
 
