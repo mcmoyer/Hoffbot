@@ -1,6 +1,7 @@
 var Bot    = require('ttapi');
 var raw_quotes = require("./quotes.js");
 var raw_bop_responses = require("./bop_responses.js");
+var raw_insults = require("./insults.js");
 var settings = require('./settings.js');
 var fs = require('fs');
 
@@ -12,11 +13,12 @@ var queue=[]
 var moderators=[];
 var current_quote = 0;
 var current_bop_response = 0;
+var current_insult = 0;
 var is_bopping = false;
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
-
+var insults = shuffle(raw_insults);
 
 function isModerator(user_id) {
   return (moderators.indexOf(user_id) >= 0);
@@ -212,6 +214,17 @@ bot.on('speak', function (data) {
 
   if (text.match(/open the pod bay doors hoff/i)) {
     bot.speak("I'm sorry " + name + ", I'm afraid I can't do that."); 
+  }
+
+  if (text.match(/taunt (.)* hoff/gi)) {
+    var tauntee = text.replace(/taunt (.*) hoff/gi,"$1");
+    phrase = insults[current_insult];
+    current_insult++;
+    if (current_insult >= insults.length) {
+      insults = shuffle(raw_insults);
+      current_insult = 0;
+    }
+    bot.speak("Hey " + tauntee + ", " + phrase);
   }
 });
 
