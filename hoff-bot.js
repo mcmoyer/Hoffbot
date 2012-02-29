@@ -4,6 +4,7 @@ var raw_bop_responses = require("./bop_responses.js");
 var raw_insults = require("./insults.js");
 var settings = require('./settings.js');
 var fs = require('fs');
+var dateFormat = require('dateformat');
 
 var bot = new Bot(settings.auth, settings.userid, settings.roomid);
 
@@ -15,6 +16,7 @@ var current_quote = 0;
 var current_bop_response = 0;
 var current_insult = 0;
 var is_bopping = false;
+var dj_counts = {};
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
@@ -71,7 +73,7 @@ bot.on('registered', function (data) {
   if (data.user[0].userid != settings.userid) {
     bot.speak('Hello ' + data.user[0].name + ": " + motd);
   } else {
-    bot.modifyProfile({name: "TheOneAndOnlyHoff"});
+    bot.modifyProfile({name: "TheHoff"});
     bot.setAvatar(5);
     bot.modifyLaptop('linux');
     fs.readFile("current_queue.json", function(err,data) {
@@ -86,7 +88,7 @@ bot.on('registered', function (data) {
       if (data)
         motd = data.toString('utf8');
     });
-    bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
+    //bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
   }
   
 });
@@ -95,13 +97,21 @@ bot.on('speak', function (data) {
    // Get the data
    var name = data.name;
    var text = data.text;
+   // log all conversations
+   var now = new Date();
+
+   fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
+     fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
+       if (err) console.log(err);
+     });
+   });
 
    // Respond to "/hello" command
-   if (text.match(/^\/hello$/)) {
+   if (text.match(/^\/hello$/i)) {
       bot.speak('Hey! How are you '+name+' ?');
    }
 
-   if (text.match(/^\/set motd:/)) {
+   if (text.match(/^\/set motd:/i)) {
       if (isModerator(data.userid) ){
         motd = text.replace(/^\/set motd:\s*/,"");
         bot.speak("Gotcha boss!");
@@ -117,7 +127,7 @@ bot.on('speak', function (data) {
      } 
    }
 
-   if (text.match(/^\/motd/)) {
+   if (text.match(/^\/motd/i)) {
       bot.speak(motd);
    }
 
@@ -160,7 +170,7 @@ bot.on('speak', function (data) {
       bot.speak("Fairly certain you weren't in line...");
     }
   } 
-  if (text.match(/^q[ue]*\?$/)) {
+  if (text.match(/^q[ue]*\?$/i)) {
     bot.speak(current_queue())
   }
 
@@ -226,6 +236,18 @@ bot.on('speak', function (data) {
     }
     bot.speak("Hey " + tauntee + ", " + phrase);
   }
+
+  if (text.match(/good boy hoff/i) && name == 'WestCoastStalker') {
+    var artists = ['Celine Dion', 'Rick Astley', 'Toni Basil', 'Dexy\'s Midnight Runners'];
+    var artist = shuffle(artists)[0];
+    bot.speak("Thanks West, I've got some sweet tunes from " + artist + " ready to spin!");
+  }
+
+  if (text.match(/^dj counts$/i)) {
+    for(djid in dj_counts) {
+      bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
+    }
+  }
 });
 
 bot.on('add_dj', function(data) {
@@ -249,6 +271,9 @@ bot.on("deregistered", function(data) {
   if (i>=0) {
     queue.splice(i,1);
   }
+  if (dj_counts[data.user[0].userid]) {
+    delete dj_counts[data.user[0].userid];
+  }
 });
 
 bot.on('newsong', function (data) {
@@ -258,12 +283,24 @@ bot.on('newsong', function (data) {
   if (song.metadata.artist.match(/hasselhoff/i)) {
     bot.speak(song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
+  };
+  //update the counts
+  if(dj_counts[song.djid]) {
+    dj_counts[song.djid].play_count++;
+  } else {
+    dj_counts[song.djid] = {name : song.djname, play_count : 1 } 
   }
-  console.dir(data.room.metadata.djs);
+});
+
+bot.on('endsong', function (data) {
+  console.log(dj_counts);
 });
 
 bot.on("rem_dj", function (data) {
   if (queue.length > 0) {
     bot.speak("Hey " + queue[0] + ", it's your turn on the DJ stand!")
+  }
+  if (dj_counts[data.user[0].userid]) {
+    delete dj_counts[data.user[0].userid];
   }
 });
