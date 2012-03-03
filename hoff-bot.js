@@ -272,6 +272,7 @@ bot.on('add_dj', function(data) {
   dj = data.user[0].name;
   dj_index = queue.indexOf(dj);
 
+  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 }
   if (queue.length > 0) {
     if (dj_index == 0) {
       queue.splice(dj_index,1);
