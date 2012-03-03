@@ -100,11 +100,20 @@ bot.on('speak', function (data) {
    // log all conversations
    var now = new Date();
 
-   fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
-     fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
-       if (err) console.log(err);
-     });
-   });
+		//try {
+	  //  fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
+    //    if (err) { 
+    //      console.log(err) 
+    //    } else { 
+    //      fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
+    //        if (err) console.log(err);
+    //      })
+    //    };
+    //  });
+    //} catch(err) {
+    //  console.log(err)
+    //}
+    
 
    // Respond to "/hello" command
    if (text.match(/^\/hello$/i)) {
