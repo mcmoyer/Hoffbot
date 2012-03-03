@@ -217,6 +217,14 @@ bot.on('speak', function (data) {
       if (i >=0) {  
         queue.splice(i,1);
         bot.speak("I agree.  I don't want to hear his music either, I'll remove him from the queue");
+      } else {
+	      if (bad_user == "next") {
+          user_name = queue[0];
+          queue.splice(0,1);
+          bot.speak("K, I removed " + user_name);
+        } else {
+					bot.speak("hmmm...I don't see that " + bad_user + " is in the queue");
+        }
       } 
     } else {
       bot.speak("We've got a Napolean on our hands here.");
