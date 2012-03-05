@@ -40,9 +40,9 @@ function current_queue() {
     return "There is no queue or at least nobody has asked the Hoff for my permission lately"
   else {
     var message = "The Spinmaster order is: "
-    for(user in queue) {
-      message += queue[user] + ", ";
-    }
+      for(user in queue) {
+        message += queue[user] + ", ";
+      }
     return message.slice(0,-2);
   }  
 }
@@ -78,74 +78,75 @@ bot.on('registered', function (data) {
     bot.modifyLaptop('linux');
     fs.readFile("current_queue.json", function(err,data) {
       if (err)
-        queue = [];
-      if (data)
-        queue = JSON.parse(data.toString('utf8'));
+      queue = [];
+    if (data)
+      queue = JSON.parse(data.toString('utf8'));
     });
     fs.readFile("current_motd.json", function(err,data) {
       if (err)
-        motd = default_motd;
-      if (data)
-        motd = data.toString('utf8');
+      motd = default_motd;
+    if (data)
+      motd = data.toString('utf8');
     });
     //bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
+    console.log(bot.roomInfo(false));
   }
-  
+
 });
 
 bot.on('speak', function (data) {
-   // Get the data
-   var name = data.name;
-   var text = data.text;
-   // log all conversations
-   var now = new Date();
+  // Get the data
+  var name = data.name;
+  var text = data.text;
+  // log all conversations
+  var now = new Date();
 
-		//try {
-	  //  fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
-    //    if (err) { 
-    //      console.log(err) 
-    //    } else { 
-    //      fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
-    //        if (err) console.log(err);
-    //      })
-    //    };
-    //  });
-    //} catch(err) {
-    //  console.log(err)
-    //}
-    
+  //try {
+  //  fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
+  //    if (err) { 
+  //      console.log(err) 
+  //    } else { 
+  //      fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
+  //        if (err) console.log(err);
+  //      })
+  //    };
+  //  });
+  //} catch(err) {
+  //  console.log(err)
+  //}
 
-   // Respond to "/hello" command
-   if (text.match(/^\/hello$/i)) {
-      bot.speak('Hey! How are you '+name+' ?');
-   }
 
-   if (text.match(/^\/set motd:/i)) {
-      if (isModerator(data.userid) ){
-        motd = text.replace(/^\/set motd:\s*/,"");
-        bot.speak("Gotcha boss!");
-      } else {
-        bot.speak("Hey KITT, we seem to have someone impersonating a moderator");
-      }
-   }
+  // Respond to "/hello" command
+  if (text.match(/^\/hello$/i)) {
+    bot.speak('Hey! How are you '+name+' ?');
+  }
 
-   if (text.match(/^\/reset motd/i)) {
-     if (isModerator(data.userid) ) {
-       motd = default_motd;
-       bot.speak("Done deal!");
-     } 
-   }
+  else if (text.match(/^\/set motd:/i)) {
+    if (isModerator(data.userid) ){
+      motd = text.replace(/^\/set motd:\s*/,"");
+      bot.speak("Gotcha boss!");
+    } else {
+      bot.speak("Hey KITT, we seem to have someone impersonating a moderator");
+    }
+  }
 
-   if (text.match(/^\/motd/i)) {
-      bot.speak(motd);
-   }
+  else if (text.match(/^\/reset motd/i)) {
+    if (isModerator(data.userid) ) {
+      motd = default_motd;
+      bot.speak("Done deal!");
+    } 
+  }
 
- 
-   if (text.match(/^What do you think Hoff/i)) {
-     blather();
-   }
+  else if (text.match(/^\/motd/i)) {
+    bot.speak(motd);
+  }
 
-  if (text.match(/^bop hoff/i)) {
+
+  else if (text.match(/^What do you think Hoff/i)) {
+    blather();
+  }
+
+  else if (text.match(/^bop hoff/i)) {
     if (is_bopping) {
       bot.speak("If I bopped any harder, my head would fly off!");
       return
@@ -161,7 +162,7 @@ bot.on('speak', function (data) {
     is_bopping = true;
   }
 
-  if (text.match(/^q[ue]* me hoff/i)) {
+  else if (text.match(/^q[ue]* me hoff/i)) {
     if (queue.indexOf(name) >= 0) {
       bot.speak("Dude, you're already in the queue");
     } else {
@@ -170,8 +171,8 @@ bot.on('speak', function (data) {
       bot.speak(current_queue());
     }
   }
- 
-  if (text.match(/^dq me hoff/i)) {
+
+  else if (text.match(/^dq me hoff/i)) {
     if (queue.indexOf(name) >= 0) {
       bot.speak("Chicken....bock bock bock!");
       queue.splice(queue.indexOf(name),1);
@@ -179,27 +180,28 @@ bot.on('speak', function (data) {
       bot.speak("Fairly certain you weren't in line...");
     }
   } 
-  if (text.match(/^q[ue]*\?$/i)) {
+
+  else if (text.match(/^q[ue]*\?$/i)) {
     bot.speak(current_queue())
   }
 
-  if (text.match(/^step up hoff/i)) {
+  else if (text.match(/^step up hoff/i)) {
     bot.addDj();
   } 
 
-  if (text.match(/^step down hoff/i)) {
+  else if (text.match(/^step down hoff/i)) {
     bot.remDj();
   }
 
-  if (text.match(/^sleep hoff/i)) {
+  else if (text.match(/^sleep hoff/i)) {
     if (isModerator(data.userid)) {
       fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
         if (err)
-          throw err;
+        throw err;
       });
       fs.writeFile("current_motd.json", motd, function(err) {
         if (err)
-          throw err;
+        throw err;
       });
       bot.speak("I am kinda tired...It's been a long day being the Hoff");
     } else {
@@ -208,7 +210,7 @@ bot.on('speak', function (data) {
 
   }
 
-  if (text.match(/^\/oust (.*)$/)) {
+  else if (text.match(/^\/oust (.*)$/)) {
     if (isModerator(data.userid)) {
       var test = 1;
       var bad_user;
@@ -218,32 +220,32 @@ bot.on('speak', function (data) {
         queue.splice(i,1);
         bot.speak("I agree.  I don't want to hear his music either, I'll remove him from the queue");
       } else {
-	      if (bad_user == "next") {
+        if (bad_user == "next") {
           user_name = queue[0];
           queue.splice(0,1);
           bot.speak("K, I removed " + user_name);
         } else {
-					bot.speak("hmmm...I don't see that " + bad_user + " is in the queue");
+          bot.speak("hmmm...I don't see that " + bad_user + " is in the queue");
         }
       } 
     } else {
       bot.speak("We've got a Napolean on our hands here.");
     } 
   }
-  
-  if (text.match(/love the hoff/i)) {
+
+  else if (text.match(/love the hoff/i)) {
     bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
   }
- 
-  if (text.match(/manners hoff/i)) {
+
+  else if (text.match(/manners hoff/i)) {
     bot.speak("Hey new DJs, just as a heads up, typically when people play songs that fit a theme (and especially if you're dj'ing) it's nice to awesome other people's songs. It's friendly, lets people know you're not afk, and encourages folks to awesome your songs, too.");
   }
 
-  if (text.match(/open the pod bay doors hoff/i)) {
+  else if (text.match(/open the pod bay doors hoff/i)) {
     bot.speak("I'm sorry " + name + ", I'm afraid I can't do that."); 
   }
 
-  if (text.match(/taunt (.)* hoff/gi)) {
+  else if (text.match(/taunt (.)* hoff/gi)) {
     var tauntee = text.replace(/taunt (.*) hoff/gi,"$1");
     phrase = insults[current_insult];
     current_insult++;
@@ -254,13 +256,13 @@ bot.on('speak', function (data) {
     bot.speak("Hey " + tauntee + ", " + phrase);
   }
 
-  if (text.match(/good boy hoff/i) && name == 'WestCoastStalker') {
+  else if (text.match(/good boy hoff/i) && name == 'WestCoastStalker') {
     var artists = ['Celine Dion', 'Rick Astley', 'Toni Basil', 'Dexy\'s Midnight Runners'];
     var artist = shuffle(artists)[0];
     bot.speak("Thanks West, I've got some sweet tunes from " + artist + " ready to spin!");
   }
 
-  if (text.match(/^dj counts$/i)) {
+  else if (text.match(/^dj counts$/i)) {
     for(djid in dj_counts) {
       bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
     }
