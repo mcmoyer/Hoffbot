@@ -21,6 +21,12 @@ var dj_counts = {};
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
 var insults = shuffle(raw_insults);
+var time_since_last_activity = Date.now();
+// inactivity time in milliseconds
+var inactivity_threshold = settings.idle_timeout;
+// time to wait before saving and logging back in
+var reboot_threshold = settings.reboot_timeout;
+
 
 function isModerator(user_id) {
   return (moderators.indexOf(user_id) >= 0);
@@ -69,7 +75,37 @@ function shuffle(array) {
   return array;
 }
 
+function cache_settings() {
+  fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
+    if (err)
+    throw err;
+  });
+  fs.writeFile("current_motd.json", motd, function(err) {
+    if (err)
+    throw err;
+  });
+}
+
+//check if we're still active
+setInterval(function() {
+  var idle_time = Date.now() - time_since_last_activity;
+  console.log(idle_time);
+  if (idle_time > inactivity_threshold) {
+    bot.speak("hey, anyone here? It's been " + (idle_time / 1000).toString() + " seconds since I saw activity");
+  };
+  if (idle_time > reboot_threshold) {
+    console.log("rebooting the hoff");
+    time_since_last_activity = Date.now();
+    cache_settings();
+    bot.roomDeregister();
+    setTimeout(function() {bot.roomRegister(settings.roomid)}, 10000);
+  }
+  
+}, (30 * 1000));
+
+
 bot.on('registered', function (data) {
+  time_since_last_activity = Date.now();
   if (data.user[0].userid != settings.userid) {
     bot.speak('Hello ' + data.user[0].name + ": " + motd);
   } else {
@@ -80,7 +116,11 @@ bot.on('registered', function (data) {
       if (err)
       queue = [];
     if (data)
-      queue = JSON.parse(data.toString('utf8'));
+      try {
+        queue = JSON.parse(data.toString('utf8'));
+      } catch (e) {
+        queue = [];
+      }
     });
     fs.readFile("current_motd.json", function(err,data) {
       if (err)
@@ -89,7 +129,13 @@ bot.on('registered', function (data) {
       motd = data.toString('utf8');
     });
     //bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
-    console.log(bot.roomInfo(false));
+    bot.roomInfo(true, function(data) {
+      try {
+        moderators = data.room.metadata.moderator_id;
+      } catch (e) {
+        moderators = [];
+      }
+    });
   }
 
 });
@@ -100,6 +146,7 @@ bot.on('speak', function (data) {
   var text = data.text;
   // log all conversations
   var now = new Date();
+  time_since_last_activity = Date.now();
 
   //try {
   //  fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
@@ -270,6 +317,7 @@ bot.on('speak', function (data) {
 });
 
 bot.on('add_dj', function(data) {
+  time_since_last_activity = Date.now();
   //check to see if the user is in the queue and remove them then
   dj = data.user[0].name;
   dj_index = queue.indexOf(dj);
@@ -286,6 +334,7 @@ bot.on('add_dj', function(data) {
 });
 
 bot.on("deregistered", function(data) {
+  time_since_last_activity = Date.now();
   dj = data.user[0].name;
   i = position_in_queue(dj);
   if (i>=0) {
@@ -297,6 +346,7 @@ bot.on("deregistered", function(data) {
 });
 
 bot.on('newsong', function (data) {
+  time_since_last_activity = Date.now();
   moderators=data.room.metadata.moderator_id;
   song = data.room.metadata.current_song;
   is_bopping = false;
@@ -313,10 +363,12 @@ bot.on('newsong', function (data) {
 });
 
 bot.on('endsong', function (data) {
+  time_since_last_activity = Date.now();
   console.log(dj_counts);
 });
 
 bot.on("rem_dj", function (data) {
+  time_since_last_activity = Date.now();
   if (queue.length > 0) {
     bot.speak("Hey " + queue[0] + ", it's your turn on the DJ stand!")
   }
