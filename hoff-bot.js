@@ -287,6 +287,21 @@ bot.on('speak', function (data) {
     } 
   }
 
+  else if (text.match(/skip next dj/i)) {
+    if (isModerator(data.userid)) {
+      if(queue.length == 1) {
+        bot.speak("Then who would be next?  There's only one dj queued");
+      } else {
+        var tmp = queue[0];
+        queue[0] = queue[1];
+        queue[1] = tmp;
+        bot.speak(current_queue()); 
+      }
+  
+    } else {
+      bot.speak("did someone say something?  Oh, it was you...sorry, can't do that for you");
+    }
+  }
   else if (text.match(/love the hoff/i)) {
     bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
   }
