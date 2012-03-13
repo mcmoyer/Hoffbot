@@ -84,6 +84,10 @@ function cache_settings() {
     if (err)
     throw err;
   });
+  fs.writeFile("current_song_count.json", JSON.stringify(dj_counts), function(err) {
+    if (err)
+    throw err;
+  });
 }
 
 //check if we're still active
@@ -120,6 +124,16 @@ bot.on('registered', function (data) {
         queue = JSON.parse(data.toString('utf8'));
       } catch (e) {
         queue = [];
+      }
+    });
+    fs.readFile("current_song_count.json", function(err,data) {
+      if (err)
+      dj_counts = {};
+    if (data)
+      try {
+        dj_counts = JSON.parse(data.toString('utf8'));
+      } catch (e) {
+        dj_counts = {};
       }
     });
     fs.readFile("current_motd.json", function(err,data) {
