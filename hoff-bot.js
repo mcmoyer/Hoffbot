@@ -256,14 +256,7 @@ bot.on('speak', function (data) {
 
   else if (text.match(/^sleep hoff/i)) {
     if (isModerator(data.userid)) {
-      fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
-        if (err)
-        throw err;
-      });
-      fs.writeFile("current_motd.json", motd, function(err) {
-        if (err)
-        throw err;
-      });
+      cache_settings();
       bot.speak("I am kinda tired...It's been a long day being the Hoff");
     } else {
       bot.speak("You're not my momma!  I don't have to listen to you!")
