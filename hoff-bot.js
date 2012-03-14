@@ -90,6 +90,10 @@ function cache_settings() {
   });
 }
 
+function people_waiting() {
+  return (queue.length > 0 && Object.keys(dj_counts).length >= 5);
+}
+
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
@@ -387,6 +391,18 @@ bot.on('newsong', function (data) {
 bot.on('endsong', function (data) {
   time_since_last_activity = Date.now();
   console.log(dj_counts);
+  console.log("people waiting: " + people_waiting().toString());
+  var overlimit_djs = [];
+  if (people_waiting()) {
+    for(dj in dj_counts) {
+      if (dj_counts[dj]['play_count'] >= 3) {
+        overlimit_djs.push(dj_counts[dj]['name']);
+      }
+    }
+    if (overlimit_djs.length > 0) {
+      bot.speak(overlimit_djs.toString() + " : Those were some great songs! Take a break and let the next dj up now");
+    }
+  }
 });
 
 bot.on("rem_dj", function (data) {
