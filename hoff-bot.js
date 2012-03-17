@@ -84,6 +84,14 @@ function cache_settings() {
     if (err)
     throw err;
   });
+  fs.writeFile("current_song_count.json", JSON.stringify(dj_counts), function(err) {
+    if (err)
+    throw err;
+  });
+}
+
+function people_waiting() {
+  return (queue.length > 0 && Object.keys(dj_counts).length >= 5);
 }
 
 //check if we're still active
@@ -120,6 +128,16 @@ bot.on('registered', function (data) {
         queue = JSON.parse(data.toString('utf8'));
       } catch (e) {
         queue = [];
+      }
+    });
+    fs.readFile("current_song_count.json", function(err,data) {
+      if (err)
+      dj_counts = {};
+    if (data)
+      try {
+        dj_counts = JSON.parse(data.toString('utf8'));
+      } catch (e) {
+        dj_counts = {};
       }
     });
     fs.readFile("current_motd.json", function(err,data) {
@@ -242,14 +260,7 @@ bot.on('speak', function (data) {
 
   else if (text.match(/^sleep hoff/i)) {
     if (isModerator(data.userid)) {
-      fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
-        if (err)
-        throw err;
-      });
-      fs.writeFile("current_motd.json", motd, function(err) {
-        if (err)
-        throw err;
-      });
+      cache_settings();
       bot.speak("I am kinda tired...It's been a long day being the Hoff");
     } else {
       bot.speak("You're not my momma!  I don't have to listen to you!")
@@ -280,6 +291,21 @@ bot.on('speak', function (data) {
     } 
   }
 
+  else if (text.match(/skip next dj/i)) {
+    if (isModerator(data.userid)) {
+      if(queue.length == 1) {
+        bot.speak("Then who would be next?  There's only one dj queued");
+      } else {
+        var tmp = queue[0];
+        queue[0] = queue[1];
+        queue[1] = tmp;
+        bot.speak(current_queue()); 
+      }
+  
+    } else {
+      bot.speak("did someone say something?  Oh, it was you...sorry, can't do that for you");
+    }
+  }
   else if (text.match(/love the hoff/i)) {
     bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
   }
@@ -365,6 +391,18 @@ bot.on('newsong', function (data) {
 bot.on('endsong', function (data) {
   time_since_last_activity = Date.now();
   console.log(dj_counts);
+  console.log("people waiting: " + people_waiting().toString());
+  var overlimit_djs = [];
+  if (people_waiting()) {
+    for(dj in dj_counts) {
+      if (dj_counts[dj]['play_count'] >= 3) {
+        overlimit_djs.push(dj_counts[dj]['name']);
+      }
+    }
+    if (overlimit_djs.length > 0) {
+      bot.speak(overlimit_djs.toString() + " : Those were some great songs! Take a break and let the next dj up now");
+    }
+  }
 });
 
 bot.on("rem_dj", function (data) {
