@@ -97,7 +97,6 @@ function people_waiting() {
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
-  console.log(idle_time);
   if (idle_time > inactivity_threshold) {
     bot.speak("hey, anyone here? It's been " + (idle_time / 1000).toString() + " seconds since I saw activity");
   };
