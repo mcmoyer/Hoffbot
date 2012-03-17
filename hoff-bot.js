@@ -2,11 +2,11 @@ var Bot    = require('ttapi');
 var raw_quotes = require("./quotes.js");
 var raw_bop_responses = require("./bop_responses.js");
 var raw_insults = require("./insults.js");
-var settings = require('./settings.js');
+//var settings = require('./settings.js');
 var fs = require('fs');
 var dateFormat = require('dateformat');
 
-var bot = new Bot(settings.auth, settings.userid, settings.roomid);
+var bot = new Bot(process.env.hoffbot_auth, process.env.hoffbot_userid, process.env.hoffbot_roomid);
 
 var default_motd = "Welcome to the 80's Time Capsule. We're glad you visited our room. Please visit our room info page to see a list of our rules. The link to it can be found in the room info tag at the top of the page. To leave the room, accelerate your DeLorean to 88 mph. :)";
 
@@ -23,9 +23,9 @@ var bop_responses = shuffle(raw_bop_responses);
 var insults = shuffle(raw_insults);
 var time_since_last_activity = Date.now();
 // inactivity time in milliseconds
-var inactivity_threshold = settings.idle_timeout;
+var inactivity_threshold = process.env.hoffbot_idle_timeout;
 // time to wait before saving and logging back in
-var reboot_threshold = settings.reboot_timeout;
+var reboot_threshold = process.env.hoffbot_reboot_timeout;
 
 
 function isModerator(user_id) {
@@ -98,7 +98,7 @@ setInterval(function() {
     time_since_last_activity = Date.now();
     cache_settings();
     bot.roomDeregister();
-    setTimeout(function() {bot.roomRegister(settings.roomid)}, 10000);
+    setTimeout(function() {bot.roomRegister(process.env.hoffbot_roomid)}, 10000);
   }
   
 }, (30 * 1000));
@@ -106,7 +106,7 @@ setInterval(function() {
 
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
-  if (data.user[0].userid != settings.userid) {
+  if (data.user[0].userid != process.env.hoffbot_userid) {
     bot.speak('Hello ' + data.user[0].name + ": " + motd);
   } else {
     bot.modifyProfile({name: "TheHoff"});

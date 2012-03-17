@@ -1,0 +1,16 @@
+This is the Hoffbot for the 80's Timecapsule on Turntable.fm
+
+Hoffbot relies on the following npm modules:
+
+ttapi
+dateformat
+
+Hoffbot also relies on the following environment variables:
+
+hoffbot_auth
+hoffbot_userid
+hoffbot_roomid
+hoffbot_idle_timeout
+hoffbot_reboot_timeout
+
+Hoffbot currently runs on Nodester!
