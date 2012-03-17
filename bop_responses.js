@@ -10,7 +10,11 @@ var bop_responses = [
   "Pamela Anderson didn't like it when I told her to bop",
   "Have you heard my version of 'La Isla Bonita'?  It's smooth",
   "in German, that's 'bop Ihren Kopf'",
-  "Bopping brings out the sparkle in my chest hair"
+  "Bopping brings out the sparkle in my chest hair",
+  "Nobody bops like the Hoff can bop!",
+  "I don't always bop, but when I do, I do it with style!",
+  "Bop 'till you drop in the hot city, keep on working day and night...oh wait, that's not my song",
+  "See that shimmer in my eyes?  That's just for you baby!"
   
   ];
 
