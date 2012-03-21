@@ -310,6 +310,15 @@ bot.on('speak', function (data) {
     bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
   }
 
+  else if (text.match(/forget the counts hoff/)) {
+    if (isModerator(data.userid)) {
+      dj_counts = {};
+      bot.speak("I haven't heard anyone play anything...hey who are those guys on the dj stand?");
+    } else {
+      bot.speak('Nice try Mr. Nobody");
+    }
+  }
+
   else if (text.match(/manners hoff/i)) {
     bot.speak("Hey new DJs, just as a heads up, typically when people play songs that fit a theme (and especially if you're dj'ing) it's nice to awesome other people's songs. It's friendly, lets people know you're not afk, and encourages folks to awesome your songs, too.");
   }
