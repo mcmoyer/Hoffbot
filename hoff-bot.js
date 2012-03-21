@@ -8,15 +8,17 @@ var dateFormat = require('dateformat');
 
 var bot = new Bot(process.env.hoffbot_auth, process.env.hoffbot_userid, process.env.hoffbot_roomid);
 
-var default_motd = "Welcome to the 80's Time Capsule. We're glad you visited our room. Please visit our room info page to see a list of our rules. The link to it can be found in the room info tag at the top of the page. To leave the room, accelerate your DeLorean to 88 mph. :)";
+var default_motd = "Welcome to the 80's Time Capsule.Type \"q me Hoff\" to be added to the queue. For room rules, visit the link in the \"Room Info\" tab.";
 
-var queue=[]
+var queue=[];
 var moderators=[];
 var current_quote = 0;
 var current_bop_response = 0;
 var current_insult = 0;
 var is_bopping = false;
 var dj_counts = {};
+var max_djs = 0;
+var recent_visitors = {};
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
@@ -27,6 +29,7 @@ var inactivity_threshold = process.env.hoffbot_idle_timeout;
 // time to wait before saving and logging back in
 var reboot_threshold = process.env.hoffbot_reboot_timeout;
 
+console.log("started")
 
 function isModerator(user_id) {
   return (moderators.indexOf(user_id) >= 0);
@@ -43,9 +46,9 @@ function blather() {
 }
 function current_queue() {
   if (queue.length == 0)
-    return "There is no queue or at least nobody has asked the Hoff for my permission lately"
+    return "There is no queue or at least nobody has asked the Hoff for my permission lately";
   else {
-    var message = "The Spinmaster order is: "
+    var message = "The Spinmaster order is: ";
       for(user in queue) {
         message += queue[user] + ", ";
       }
@@ -76,14 +79,26 @@ function shuffle(array) {
 }
 
 function cache_settings() {
+  cache_queue();
+  cache_motd();
+  cache_song_count();
+}
+
+function cache_queue() {
   fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
     if (err)
     throw err;
   });
+}
+
+function cache_motd() {
   fs.writeFile("current_motd.json", motd, function(err) {
     if (err)
     throw err;
   });
+}
+
+function cache_song_count() {
   fs.writeFile("current_song_count.json", JSON.stringify(dj_counts), function(err) {
     if (err)
     throw err;
@@ -94,18 +109,22 @@ function people_waiting() {
   return (queue.length > 0 && Object.keys(dj_counts).length >= 5);
 }
 
+function dj_spot_available() {
+  return (Object.keys(dj_counts).length < max_djs);
+}
+
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
   if (idle_time > inactivity_threshold) {
     bot.speak("hey, anyone here? It's been " + (idle_time / 1000).toString() + " seconds since I saw activity");
-  };
+  }
   if (idle_time > reboot_threshold) {
     console.log("rebooting the hoff");
     time_since_last_activity = Date.now();
     cache_settings();
     bot.roomDeregister();
-    setTimeout(function() {bot.roomRegister(process.env.hoffbot_roomid)}, 10000);
+    setTimeout(function() {bot.roomRegister(process.env.hoffbot_roomid);}, 10000);
   }
   
 }, (30 * 1000));
@@ -114,7 +133,15 @@ setInterval(function() {
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
   if (data.user[0].userid != process.env.hoffbot_userid) {
-    bot.speak('Hello ' + data.user[0].name + ": " + motd);
+    if(recent_visitors[data.user[0].userid]) { 
+      if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
+        bot.speak('Hello @' + data.user[0].name + ": " + motd);
+      } else {
+        console.log("user must have refreshed");
+      }
+    } else {
+      bot.speak('Hello @' + data.user[0].name + ": " + motd);
+    }
   } else {
     bot.modifyProfile({name: "TheHoff"});
     bot.setAvatar(5);
@@ -148,7 +175,20 @@ bot.on('registered', function (data) {
     //bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
     bot.roomInfo(true, function(data) {
       try {
+        max_djs = data.room.metadata.max_djs;
         moderators = data.room.metadata.moderator_id;
+        current_djs = data.room.metadata.djs;
+        for(dj_id in current_djs) {
+          if (!dj_counts[dj_id]) {
+            dj_counts[dj_id] = { name: 'not sure', play_count : 0 };
+          }
+        }
+        for(dj_id in dj_counts) {
+          if (current_djs.indexOf(dj_id) == -1) {
+            delete dj_counts[dj_id];
+          }
+        }
+        
       } catch (e) {
         moderators = [];
       }
@@ -182,7 +222,7 @@ bot.on('speak', function (data) {
 
   // Respond to "/hello" command
   if (text.match(/^\/hello$/i)) {
-    bot.speak('Hey! How are you '+name+' ?');
+    bot.speak('Hey! How are you @'+name+' ?');
   }
 
   else if (text.match(/^\/set motd:/i)) {
@@ -213,7 +253,7 @@ bot.on('speak', function (data) {
   else if (text.match(/^bop hoff/i)) {
     if (is_bopping) {
       bot.speak("If I bopped any harder, my head would fly off!");
-      return
+      return false;
     }
     phrase = bop_responses[current_bop_response];
     current_bop_response++;
@@ -232,7 +272,11 @@ bot.on('speak', function (data) {
     } else {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
-      bot.speak(current_queue());
+      if (dj_spot_available()) {
+        bot.speak("go ahead @"+name+" and hop up - seat's all yours");
+      } else {
+        bot.speak(current_queue());
+      }
     }
   }
 
@@ -246,7 +290,7 @@ bot.on('speak', function (data) {
   } 
 
   else if (text.match(/^q[ue]*\?$/i)) {
-    bot.speak(current_queue())
+    bot.speak(current_queue());
   }
 
   else if (text.match(/^step up hoff/i)) {
@@ -262,7 +306,7 @@ bot.on('speak', function (data) {
       cache_settings();
       bot.speak("I am kinda tired...It's been a long day being the Hoff");
     } else {
-      bot.speak("You're not my momma!  I don't have to listen to you!")
+      bot.speak("You're not my momma!  I don't have to listen to you!");
     }
 
   }
@@ -323,7 +367,7 @@ bot.on('speak', function (data) {
   }
 
   else if (text.match(/open the pod bay doors hoff/i)) {
-    bot.speak("I'm sorry " + name + ", I'm afraid I can't do that."); 
+    bot.speak("I'm sorry @" + name + ", I'm afraid I can't do that."); 
   }
 
   else if (text.match(/taunt (.)* hoff/gi)) {
@@ -348,6 +392,15 @@ bot.on('speak', function (data) {
       bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
     }
   }
+
+  else if (text.match(/^there is no q[ue]* hoff$/i)) {
+    if (isModerator(data.userid)) {
+      bot.speak("These are not the dj's I'm looking for...");
+      queue = [];
+    } else {
+      bot.speak("Your Jedi mind tricks will not work with me!");
+    }
+  }
 });
 
 bot.on('add_dj', function(data) {
@@ -356,13 +409,13 @@ bot.on('add_dj', function(data) {
   dj = data.user[0].name;
   dj_index = queue.indexOf(dj);
 
-  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 }
+  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 };
   if (queue.length > 0) {
     if (dj_index == 0) {
       queue.splice(dj_index,1);
       bot.speak("Give it up for " + dj);
     } else {
-      bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down")
+      bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down");
     } 
   }
 });
@@ -377,6 +430,8 @@ bot.on("deregistered", function(data) {
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
   }
+  recent_visitors[data.user[0].userid] = Date.now();
+
 });
 
 bot.on('newsong', function (data) {
@@ -385,12 +440,13 @@ bot.on('newsong', function (data) {
   song = data.room.metadata.current_song;
   is_bopping = false;
   if (song.metadata.artist.match(/hasselhoff/i)) {
-    bot.speak(song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
+    bot.speak("@" + song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
-  };
+  }
   //update the counts
   if(dj_counts[song.djid]) {
     dj_counts[song.djid].play_count++;
+    dj_counts[song.djid].name = song.djname;
   } else {
     dj_counts[song.djid] = {name : song.djname, play_count : 1 } 
   }
@@ -398,8 +454,8 @@ bot.on('newsong', function (data) {
 
 bot.on('endsong', function (data) {
   time_since_last_activity = Date.now();
-  console.log(dj_counts);
   console.log("people waiting: " + people_waiting().toString());
+  cache_song_count();
   var overlimit_djs = [];
   if (people_waiting()) {
     for(dj in dj_counts) {
@@ -416,9 +472,10 @@ bot.on('endsong', function (data) {
 bot.on("rem_dj", function (data) {
   time_since_last_activity = Date.now();
   if (queue.length > 0) {
-    bot.speak("Hey " + queue[0] + ", it's your turn on the DJ stand!")
+    bot.speak("Hey @" + queue[0] + ", it's your turn on the DJ stand!");
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
   }
 });
+
