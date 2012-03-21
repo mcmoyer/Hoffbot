@@ -29,6 +29,7 @@ var inactivity_threshold = process.env.hoffbot_idle_timeout;
 // time to wait before saving and logging back in
 var reboot_threshold = process.env.hoffbot_reboot_timeout;
 
+console.log("started")
 
 function isModerator(user_id) {
   return (moderators.indexOf(user_id) >= 0);
