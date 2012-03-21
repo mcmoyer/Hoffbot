@@ -1,6 +1,6 @@
 {
   "name" : "Hoffbot",
-  "node" : "v0.6.12",
+  "node" : "0.6.12",
   "description" : "A node.js hoffbot application",
   "maintainers" : "Marlon Moyer",
   "version" : "0.5.0",
