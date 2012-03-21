@@ -114,7 +114,7 @@ setInterval(function() {
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
   if (data.user[0].userid != process.env.hoffbot_userid) {
-    bot.speak('Hello ' + data.user[0].name + ": " + motd);
+    bot.speak('Hello @' + data.user[0].name + ": " + motd);
   } else {
     bot.modifyProfile({name: "TheHoff"});
     bot.setAvatar(5);
@@ -182,7 +182,7 @@ bot.on('speak', function (data) {
 
   // Respond to "/hello" command
   if (text.match(/^\/hello$/i)) {
-    bot.speak('Hey! How are you '+name+' ?');
+    bot.speak('Hey! How are you @'+name+' ?');
   }
 
   else if (text.match(/^\/set motd:/i)) {
@@ -314,7 +314,7 @@ bot.on('speak', function (data) {
   }
 
   else if (text.match(/open the pod bay doors hoff/i)) {
-    bot.speak("I'm sorry " + name + ", I'm afraid I can't do that."); 
+    bot.speak("I'm sorry @" + name + ", I'm afraid I can't do that."); 
   }
 
   else if (text.match(/taunt (.)* hoff/gi)) {
@@ -381,7 +381,7 @@ bot.on('newsong', function (data) {
   song = data.room.metadata.current_song;
   is_bopping = false;
   if (song.metadata.artist.match(/hasselhoff/i)) {
-    bot.speak(song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
+    bot.speak("@" + song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
   };
   //update the counts
