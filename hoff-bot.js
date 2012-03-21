@@ -8,7 +8,7 @@ var dateFormat = require('dateformat');
 
 var bot = new Bot(process.env.hoffbot_auth, process.env.hoffbot_userid, process.env.hoffbot_roomid);
 
-var default_motd = "Welcome to the 80's Time Capsule. We're glad you visited our room. Please visit our room info page to see a list of our rules. The link to it can be found in the room info tag at the top of the page. To leave the room, accelerate your DeLorean to 88 mph. :)";
+var default_motd = "Welcome to the 80's Time Capsule.Type \"q me Hoff\" to be added to the queue. For room rules, visit the link in the \"Room Info\" tab.";
 
 var queue=[]
 var moderators=[];
