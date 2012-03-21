@@ -10,7 +10,7 @@ var bot = new Bot(process.env.hoffbot_auth, process.env.hoffbot_userid, process.
 
 var default_motd = "Welcome to the 80's Time Capsule.Type \"q me Hoff\" to be added to the queue. For room rules, visit the link in the \"Room Info\" tab.";
 
-var queue=[]
+var queue=[];
 var moderators=[];
 var current_quote = 0;
 var current_bop_response = 0;
@@ -45,9 +45,9 @@ function blather() {
 }
 function current_queue() {
   if (queue.length == 0)
-    return "There is no queue or at least nobody has asked the Hoff for my permission lately"
+    return "There is no queue or at least nobody has asked the Hoff for my permission lately";
   else {
-    var message = "The Spinmaster order is: "
+    var message = "The Spinmaster order is: ";
       for(user in queue) {
         message += queue[user] + ", ";
       }
@@ -117,13 +117,13 @@ setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
   if (idle_time > inactivity_threshold) {
     bot.speak("hey, anyone here? It's been " + (idle_time / 1000).toString() + " seconds since I saw activity");
-  };
+  }
   if (idle_time > reboot_threshold) {
     console.log("rebooting the hoff");
     time_since_last_activity = Date.now();
     cache_settings();
     bot.roomDeregister();
-    setTimeout(function() {bot.roomRegister(process.env.hoffbot_roomid)}, 10000);
+    setTimeout(function() {bot.roomRegister(process.env.hoffbot_roomid);}, 10000);
   }
   
 }, (30 * 1000));
@@ -179,7 +179,7 @@ bot.on('registered', function (data) {
         current_djs = data.room.metadata.djs;
         for(dj_id in current_djs) {
           if (!dj_counts[dj_id]) {
-            dj_counts[dj_id] = { name: 'not sure', play_count : 0 }
+            dj_counts[dj_id] = { name: 'not sure', play_count : 0 };
           }
         }
         for(dj_id in dj_counts) {
@@ -252,7 +252,7 @@ bot.on('speak', function (data) {
   else if (text.match(/^bop hoff/i)) {
     if (is_bopping) {
       bot.speak("If I bopped any harder, my head would fly off!");
-      return
+      return false;
     }
     phrase = bop_responses[current_bop_response];
     current_bop_response++;
@@ -289,7 +289,7 @@ bot.on('speak', function (data) {
   } 
 
   else if (text.match(/^q[ue]*\?$/i)) {
-    bot.speak(current_queue())
+    bot.speak(current_queue());
   }
 
   else if (text.match(/^step up hoff/i)) {
@@ -305,7 +305,7 @@ bot.on('speak', function (data) {
       cache_settings();
       bot.speak("I am kinda tired...It's been a long day being the Hoff");
     } else {
-      bot.speak("You're not my momma!  I don't have to listen to you!")
+      bot.speak("You're not my momma!  I don't have to listen to you!");
     }
 
   }
@@ -399,13 +399,13 @@ bot.on('add_dj', function(data) {
   dj = data.user[0].name;
   dj_index = queue.indexOf(dj);
 
-  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 }
+  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 };
   if (queue.length > 0) {
     if (dj_index == 0) {
       queue.splice(dj_index,1);
       bot.speak("Give it up for " + dj);
     } else {
-      bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down")
+      bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down");
     } 
   }
 });
@@ -432,7 +432,7 @@ bot.on('newsong', function (data) {
   if (song.metadata.artist.match(/hasselhoff/i)) {
     bot.speak("@" + song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
-  };
+  }
   //update the counts
   if(dj_counts[song.djid]) {
     dj_counts[song.djid].play_count++;
@@ -462,7 +462,7 @@ bot.on('endsong', function (data) {
 bot.on("rem_dj", function (data) {
   time_since_last_activity = Date.now();
   if (queue.length > 0) {
-    bot.speak("Hey @" + queue[0] + ", it's your turn on the DJ stand!")
+    bot.speak("Hey @" + queue[0] + ", it's your turn on the DJ stand!");
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
