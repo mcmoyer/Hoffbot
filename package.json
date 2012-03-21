@@ -1,0 +1,10 @@
+{
+  "name" : "Hoffbot",
+  "description" : "A node.js hoffbot application",
+  "maintainers" : "Marlon Moyer",
+  "version" : "0.5.0",
+  "dependencies" : {
+    "ttapi" : ">= 1.1.4",
+    "dateformat" : ">= 1.0.2.-1.2.3"
+  }
+}
