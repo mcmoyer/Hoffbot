@@ -77,14 +77,26 @@ function shuffle(array) {
 }
 
 function cache_settings() {
+  cache_queue();
+  cache_motd();
+  cache_song_count();
+}
+
+function cache_queue() {
   fs.writeFile("current_queue.json", JSON.stringify(queue), function(err) {
     if (err)
     throw err;
   });
+}
+
+function cache_motd() {
   fs.writeFile("current_motd.json", motd, function(err) {
     if (err)
     throw err;
   });
+}
+
+function cache_song_count() {
   fs.writeFile("current_song_count.json", JSON.stringify(dj_counts), function(err) {
     if (err)
     throw err;
@@ -421,8 +433,8 @@ bot.on('newsong', function (data) {
 
 bot.on('endsong', function (data) {
   time_since_last_activity = Date.now();
-  console.log(dj_counts);
   console.log("people waiting: " + people_waiting().toString());
+  cache_song_count();
   var overlimit_djs = [];
   if (people_waiting()) {
     for(dj in dj_counts) {
