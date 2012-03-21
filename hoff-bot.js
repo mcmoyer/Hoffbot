@@ -18,6 +18,7 @@ var current_insult = 0;
 var is_bopping = false;
 var dj_counts = {};
 var max_djs = 0;
+var recent_visitors = {};
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
@@ -131,7 +132,11 @@ setInterval(function() {
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
   if (data.user[0].userid != process.env.hoffbot_userid) {
-    bot.speak('Hello @' + data.user[0].name + ": " + motd);
+    if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
+      bot.speak('Hello @' + data.user[0].name + ": " + motd);
+    } else {
+      console.log("user must have refreshed");
+    }
   } else {
     bot.modifyProfile({name: "TheHoff"});
     bot.setAvatar(5);
@@ -411,6 +416,8 @@ bot.on("deregistered", function(data) {
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
   }
+  recent_visitors[data.user[0].userid] = Date.now();
+
 });
 
 bot.on('newsong', function (data) {
