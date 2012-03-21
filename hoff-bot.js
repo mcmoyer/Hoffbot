@@ -339,6 +339,11 @@ bot.on('speak', function (data) {
       bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
     }
   }
+
+  else if (text.match(/^there is no q[ue]* hoff$/i)) {
+    bot.speak("These are not the dj's I'm looking for...");
+    queue = [];
+  }
 });
 
 bot.on('add_dj', function(data) {
