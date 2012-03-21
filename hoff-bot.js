@@ -132,10 +132,14 @@ setInterval(function() {
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
   if (data.user[0].userid != process.env.hoffbot_userid) {
-    if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
-      bot.speak('Hello @' + data.user[0].name + ": " + motd);
+    if(recent_visitors[data.user[0].userid]) { 
+      if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
+        bot.speak('Hello @' + data.user[0].name + ": " + motd);
+      } else {
+        console.log("user must have refreshed");
+      }
     } else {
-      console.log("user must have refreshed");
+      bot.speak('Hello @' + data.user[0].name + ": " + motd);
     }
   } else {
     bot.modifyProfile({name: "TheHoff"});
