@@ -17,6 +17,7 @@ var current_bop_response = 0;
 var current_insult = 0;
 var is_bopping = false;
 var dj_counts = {};
+var max_djs = 0;
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
@@ -94,6 +95,10 @@ function people_waiting() {
   return (queue.length > 0 && Object.keys(dj_counts).length >= 5);
 }
 
+function dj_spot_available() {
+  return (Object.keys(dj_counts).length < max_djs);
+}
+
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
@@ -148,7 +153,20 @@ bot.on('registered', function (data) {
     //bot.speak("I'm back, anybody miss me? What am I saying, of course you did!");
     bot.roomInfo(true, function(data) {
       try {
+        max_djs = data.room.metadata.max_djs;
         moderators = data.room.metadata.moderator_id;
+        current_djs = data.room.metadata.djs;
+        for(dj_id in current_djs) {
+          if (!dj_counts[dj_id]) {
+            dj_counts[dj_id] = { name: 'not sure', play_count : 0 }
+          }
+        }
+        for(dj_id in dj_counts) {
+          if (current_djs.indexOf(dj_id) == -1) {
+            delete dj_counts[dj_id];
+          }
+        }
+        
       } catch (e) {
         moderators = [];
       }
@@ -232,7 +250,11 @@ bot.on('speak', function (data) {
     } else {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
-      bot.speak(current_queue());
+      if (dj_spot_available()) {
+        bot.speak("go ahead @"+name+" and hop up - seat's all yours");
+      } else {
+        bot.speak(current_queue());
+      }
     }
   }
 
@@ -341,8 +363,12 @@ bot.on('speak', function (data) {
   }
 
   else if (text.match(/^there is no q[ue]* hoff$/i)) {
-    bot.speak("These are not the dj's I'm looking for...");
-    queue = [];
+    if (isModerator(data.userid)) {
+      bot.speak("These are not the dj's I'm looking for...");
+      queue = [];
+    } else {
+      bot.speak("Your Jedi mind tricks will not work with me!");
+    }
   }
 });
 
@@ -387,6 +413,7 @@ bot.on('newsong', function (data) {
   //update the counts
   if(dj_counts[song.djid]) {
     dj_counts[song.djid].play_count++;
+    dj_counts[song.djid].name = song.djname;
   } else {
     dj_counts[song.djid] = {name : song.djname, play_count : 1 } 
   }
@@ -412,9 +439,10 @@ bot.on('endsong', function (data) {
 bot.on("rem_dj", function (data) {
   time_since_last_activity = Date.now();
   if (queue.length > 0) {
-    bot.speak("Hey " + queue[0] + ", it's your turn on the DJ stand!")
+    bot.speak("Hey @" + queue[0] + ", it's your turn on the DJ stand!")
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
   }
 });
+
