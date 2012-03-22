@@ -272,7 +272,7 @@ bot.on('speak', function (data) {
     } else {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
-      if (dj_spot_available()) {
+      if (dj_spot_available() && (queue.length == 1)) {
         bot.speak("go ahead @"+name+" and hop up - seat's all yours");
       } else {
         bot.speak(current_queue());
@@ -358,7 +358,7 @@ bot.on('speak', function (data) {
       dj_counts = {};
       bot.speak("I haven't heard anyone play anything...hey who are those guys on the dj stand?");
     } else {
-      bot.speak('Nice try Mr. Nobody");
+      bot.speak("Nice try Mr. Nobody");
     }
   }
 
