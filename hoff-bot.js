@@ -210,6 +210,7 @@ bot.on('speak', function (data) {
   // Get the data
   var name = data.name;
   var text = data.text;
+  var dj_id = data.userid;
   // log all conversations
   var now = new Date();
   time_since_last_activity = Date.now();
@@ -270,6 +271,8 @@ bot.on('speak', function (data) {
   else if (text.match(/^q[ue]* me hoff/i)) {
     if (queue.indexOf(name) >= 0) {
       bot.speak("Dude, you're already in the queue");
+    } else if(dj_counts[dj_id]) {
+      bot.speak("Do you not realize where you are?  Maybe next time try to not be on the dj stand when you queue yourself!");
     } else {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
