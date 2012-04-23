@@ -109,6 +109,23 @@ function dj_spot_available() {
   return (Object.keys(dj_counts).length < max_djs);
 }
 
+function stub_out_dj_spots(current_djs) {
+  var dj_id;
+  console.log(current_djs);
+  console.log(dj_counts);
+  current_djs.forEach(function(dj_id) {
+    if (dj_counts[dj_id] === undefined) {
+      dj_counts[dj_id] = { name: 'not sure', play_count: 0 };
+    }
+  });
+  for(dj_id in dj_counts) {
+    console.log(current_djs.indexOf(dj_id));
+    if (current_djs.indexOf(dj_id) === -1) {
+      delete dj_counts[dj_id];
+    }
+  }
+}
+
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
@@ -173,18 +190,7 @@ bot.on('registered', function (data) {
       try {
         max_djs = data.room.metadata.max_djs;
         moderators = data.room.metadata.moderator_id;
-        current_djs = data.room.metadata.djs;
-        for(dj_id in current_djs) {
-          if (!dj_counts[dj_id]) {
-            dj_counts[dj_id] = { name: 'not sure', play_count : 0 };
-          }
-        }
-        for(dj_id in dj_counts) {
-          if (current_djs.indexOf(dj_id) == -1) {
-            delete dj_counts[dj_id];
-          }
-        }
-        
+        stub_out_dj_spots(data.room.metadata.djs);
       } catch (e) {
         moderators = [];
       }
