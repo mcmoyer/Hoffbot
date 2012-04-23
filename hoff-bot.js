@@ -221,6 +221,10 @@ bot.on('speak', function (data) {
     bot.speak('Hey! How are you ' + format_name(name) +' ?');
   }
 
+  else if (text.match(/fu[c]*k you hoff/i)) {
+    bot.speak("I'm rubber and you're glue, whatever you say bounces off me and sticks to you!");
+  }
+
   else if (text.match(/^\/set motd:/i)) {
     if (isModerator(data.userid) ){
       motd = text.replace(/^\/set motd:\s*/,"");
