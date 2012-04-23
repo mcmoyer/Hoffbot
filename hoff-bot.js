@@ -229,6 +229,7 @@ bot.on('speak', function (data) {
     if (isModerator(data.userid) ){
       motd = text.replace(/^\/set motd:\s*/,"");
       bot.speak("Gotcha boss!");
+      cache_motd();
     } else {
       bot.speak("Hey KITT, we seem to have someone impersonating a moderator");
     }
@@ -277,6 +278,7 @@ bot.on('speak', function (data) {
       } else {
         bot.speak(current_queue());
       }
+      cache_queue();
     }
   }
 
@@ -284,6 +286,7 @@ bot.on('speak', function (data) {
     if (queue.indexOf(name) >= 0) {
       bot.speak("Chicken....bock bock bock!");
       queue.splice(queue.indexOf(name),1);
+      cache_queue();
     } else {
       bot.speak("Fairly certain you weren't in line...");
     }
@@ -329,6 +332,7 @@ bot.on('speak', function (data) {
           bot.speak("hmmm...I don't see that " + bad_user + " is in the queue");
         }
       } 
+      cache_queue();
     } else {
       bot.speak("We've got a Napolean on our hands here.");
     } 
@@ -343,8 +347,8 @@ bot.on('speak', function (data) {
         queue[0] = queue[1];
         queue[1] = tmp;
         bot.speak(current_queue()); 
+        cache_queue();
       }
-  
     } else {
       bot.speak("did someone say something?  Oh, it was you...sorry, can't do that for you");
     }
@@ -398,6 +402,7 @@ bot.on('speak', function (data) {
     if (isModerator(data.userid)) {
       bot.speak("These are not the dj's I'm looking for...");
       queue = [];
+      cache_queue();
     } else {
       bot.speak("Your Jedi mind tricks will not work with me!");
     }
@@ -415,6 +420,7 @@ bot.on('add_dj', function(data) {
     if (dj_index === 0) {
       queue.splice(dj_index,1);
       bot.speak("Give it up for " + format_name(dj) );
+      cache_queue();
     } else {
       bot.speak("HEY! " + format_name(dj) + ", we don't like it when people cut in line around here! - " + format_name(queue[0]) + " is up next so please step down");
     } 
@@ -427,9 +433,11 @@ bot.on("deregistered", function(data) {
   i = position_in_queue(dj);
   if (i>=0) {
     queue.splice(i,1);
+    cache_queue();
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
+    cache_song_count();
   }
   recent_visitors[data.user[0].userid] = Date.now();
 
@@ -451,12 +459,15 @@ bot.on('newsong', function (data) {
   } else {
     dj_counts[song.djid] = {name : song.djname, play_count : 1 }; 
   }
+  cache_song_count();
 });
 
 bot.on('endsong', function (data) {
   time_since_last_activity = Date.now();
+  console.log(dateFormat(time_since_last_activity, "isoDateTime"));
   console.log("people waiting: " + people_waiting().toString());
-  cache_song_count();
+  console.log(queue);
+  console.log(dj_counts);
   var overlimit_djs = [];
   if (people_waiting()) {
     var dj;
