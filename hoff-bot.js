@@ -49,24 +49,16 @@ function blather() {
   }
 }
 function current_queue() {
-  if (queue.length == 0)
+  if (queue.length === 0)
     return "There is no queue or at least nobody has asked the Hoff for my permission lately";
   else {
     var message = "The Spinmaster order is: ";
-      for(user in queue) {
-        message += queue[user] + ", ";
-      }
+    queue.forEach(function(user) { message += user + ", "; });
     return message.slice(0,-2);
   }  
 }
 function position_in_queue(user) {
-  var ret = -1;
-  for(var i in queue) {
-    if(user.toUpperCase() === queue[i].toUpperCase() ) {
-      ret = i;
-    }
-  }
-  return(ret);
+  return queue.map(function(i) { return i.toUpperCase();}).indexOf(user.toUpperCase());
 }
 
 function shuffle(array) {
@@ -379,6 +371,7 @@ bot.on('speak', function (data) {
   }
 
   else if (text.match(/^dj counts$/i)) {
+    var djid;
     for(djid in dj_counts) {
       bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
     }
@@ -402,7 +395,7 @@ bot.on('add_dj', function(data) {
 
   dj_counts[data.user[0].userid] = { name: dj, play_count : 0 };
   if (queue.length > 0) {
-    if (dj_index == 0) {
+    if (dj_index === 0) {
       queue.splice(dj_index,1);
       bot.speak("Give it up for " + dj);
     } else {
@@ -439,7 +432,7 @@ bot.on('newsong', function (data) {
     dj_counts[song.djid].play_count++;
     dj_counts[song.djid].name = song.djname;
   } else {
-    dj_counts[song.djid] = {name : song.djname, play_count : 1 } 
+    dj_counts[song.djid] = {name : song.djname, play_count : 1 }; 
   }
 });
 
@@ -449,9 +442,10 @@ bot.on('endsong', function (data) {
   cache_song_count();
   var overlimit_djs = [];
   if (people_waiting()) {
+    var dj;
     for(dj in dj_counts) {
-      if (dj_counts[dj]['play_count'] >= 3) {
-        overlimit_djs.push(dj_counts[dj]['name']);
+      if (dj_counts[dj].play_count >= 3) {
+        overlimit_djs.push(format_name(dj_counts[dj].name));
       }
     }
     if (overlimit_djs.length > 0) {
