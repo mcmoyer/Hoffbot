@@ -126,6 +126,13 @@ function stub_out_dj_spots(current_djs) {
   }
 }
 
+function format_name(dj_name) {
+  if(dj_name[0] === '@') {
+    return dj_name;
+  } else {
+    return '@' + dj_name;
+  }
+}
 //check if we're still active
 setInterval(function() {
   var idle_time = Date.now() - time_since_last_activity;
@@ -148,12 +155,12 @@ bot.on('registered', function (data) {
   if (data.user[0].userid != process.env.hoffbot_userid) {
     if(recent_visitors[data.user[0].userid]) { 
       if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
-        bot.speak('Hello @' + data.user[0].name + ": " + motd);
+        bot.speak('Hello ' + format_name(data.user[0].name) + ": " + motd);
       } else {
         console.log("user must have refreshed");
       }
     } else {
-      bot.speak('Hello @' + data.user[0].name + ": " + motd);
+      bot.speak('Hello ' + format_name(data.user[0].name) + ": " + motd);
     }
   } else {
     bot.modifyProfile({name: "TheHoff"});
@@ -211,7 +218,7 @@ bot.on('speak', function (data) {
 
   // Respond to "/hello" command
   if (text.match(/^\/hello$/i)) {
-    bot.speak('Hey! How are you @'+name+' ?');
+    bot.speak('Hey! How are you ' + format_name(name) +' ?');
   }
 
   else if (text.match(/^\/set motd:/i)) {
@@ -262,7 +269,7 @@ bot.on('speak', function (data) {
       queue[queue.length] = name;
       bot.speak("Groovy!  Can't wait to hear what you're gonna spin");
       if (dj_spot_available() && (queue.length == 1)) {
-        bot.speak("go ahead @"+name+" and hop up - seat's all yours");
+        bot.speak("go ahead " + format_name(name) + " and hop up - seat's all yours");
       } else {
         bot.speak(current_queue());
       }
@@ -367,7 +374,7 @@ bot.on('speak', function (data) {
       insults = shuffle(raw_insults);
       current_insult = 0;
     }
-    bot.speak("Hey " + tauntee + ", " + phrase);
+    bot.speak("Hey " + format_name(tauntee) + ", " + phrase);
   }
 
   else if (text.match(/good boy hoff/i) && name == 'WestCoastStalker') {
@@ -403,9 +410,9 @@ bot.on('add_dj', function(data) {
   if (queue.length > 0) {
     if (dj_index === 0) {
       queue.splice(dj_index,1);
-      bot.speak("Give it up for " + dj);
+      bot.speak("Give it up for " + format_name(dj) );
     } else {
-      bot.speak("HEY! " + dj + ", we don't like it when people cut in line around here! - " + queue[0] + " is up next so please step down");
+      bot.speak("HEY! " + format_name(dj) + ", we don't like it when people cut in line around here! - " + format_name(queue[0]) + " is up next so please step down");
     } 
   }
 });
@@ -430,7 +437,7 @@ bot.on('newsong', function (data) {
   song = data.room.metadata.current_song;
   is_bopping = false;
   if (song.metadata.artist.match(/hasselhoff/i)) {
-    bot.speak("@" + song.djname + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
+    bot.speak(format_name(song.djname) + ", you have impecable taste! You, my friend, deserve an 'Awesome' for this gem of a song");
     bot.bop();
   }
   //update the counts
@@ -463,7 +470,13 @@ bot.on('endsong', function (data) {
 bot.on("rem_dj", function (data) {
   time_since_last_activity = Date.now();
   if (queue.length > 0) {
-    bot.speak("Hey @" + queue[0] + ", it's your turn on the DJ stand!");
+    var name = format_name(queue[0]);
+    if (name == "@DJ Groupenfondel") {
+    	bot.speak("Hey " + format_name(queue[0]) + ", it's your turn, ONLY TO PLAY MUSIC -- NOTHING ELSE, on the DJ stand!");
+    }
+    else { 
+    	bot.speak("Hey " + format_name(queue[0]) + ", it's your turn on the DJ stand!");
+    }
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
