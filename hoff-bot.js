@@ -32,6 +32,9 @@ var reboot_threshold = process.env.hoffbot_reboot_timeout;
 console.log("started");
 bot.debug = false;
 
+function rpad(str, count) {
+  return ((str + Array(count+1).join(" ")).substr(0,count));
+}
 function isModerator(user_id) {
   return (moderators.indexOf(user_id) >= 0);
 }
@@ -206,20 +209,7 @@ bot.on('speak', function (data) {
   var now = new Date();
   time_since_last_activity = Date.now();
 
-  //try {
-  //  fs.open((dateFormat(now, "yyyy-mm-dd") + "-chat.log"), "a", 0666, function(err, fd) {
-  //    if (err) { 
-  //      console.log(err) 
-  //    } else { 
-  //      fs.write(fd, dateFormat(now, "HH:MM") + "\t" + name + "\t" + text + "\n", null, function(err,written) {
-  //        if (err) console.log(err);
-  //      })
-  //    };
-  //  });
-  //} catch(err) {
-  //  console.log(err)
-  //}
-
+  console.log(rpad(dateFormat(time_since_last_activity, "HH:MM" ),6) + rpad(name,20) + text);
 
   // Respond to "/hello" command
   if (text.match(/^\/hello$/i)) {
