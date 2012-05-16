@@ -486,6 +486,8 @@ bot.on('newsong', function (data) {
     dj_counts[song.djid] = {name : song.djname, play_count : 1 }; 
   }
   cache_song_count();
+  console.log(rpad(dateFormat(time_since_last_activity, "HH:MM" ),6) + rpad(song.djname,20) + "Started playing: " + song.metadata.song + " - by: " + song.metadata.artist);
+
 });
 
 bot.on('endsong', function (data) {
