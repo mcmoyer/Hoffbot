@@ -29,6 +29,22 @@ var inactivity_threshold = process.env.hoffbot_idle_timeout;
 // time to wait before saving and logging back in
 var reboot_threshold = process.env.hoffbot_reboot_timeout;
 
+var add_dj_responses = {
+  "mrdiggit" : "Hush everybody, MrDiggit's about to play a record",
+  "lord leo" : "Prostrate yourselves heathens!, Lord Leo hath taken to the stage!",
+  "housekat" : "Woohoo the fastest trigger finger in TT history has taken the stage...behave now or HouseKat'll boot ya!",
+  "mc caveman" : "Dj'ing is so easy, even a caveman can do it!",
+  "the lone deranger" : "Who was that masked man anyway Pa? Why son, it's the LONE DERANGER!",
+  "guffy" : "Let's all raise a :beer: for Guffy",
+  "evil zed" : "Give it up for the man who makes Satan look like the Avon Lady, Eviiiillllll Zeeeeeeeed!",
+  "slappy mcgee" : "Give me an S...Give me an L...Give me an A....oh for god sakes, just give it up for Slappy!",
+  "digithead" : "Welcome to the stage Crockett....err, I mean DigitHead",
+  "drcakes" : "Obviously the cake is not a lie because it's now on stage about to spin some tunes",
+  "rob usdin" : "'Scotty, Give me all the Rob Usdin you can!'...'Aye Captain, but I don't think she'll take much more!'",
+  "emptyjay" : "give it up for Matthew Jami...Matthew Jacki...Matthew Hackis...ahhhh....now I see why you chose EmptyJay",
+  "vj frankie balls" : ":notes: 'Cause he's got the biggest balls of them all! :notes: Give it up for VJ FB!"
+}
+
 console.log("started");
 bot.debug = false;
 
@@ -422,7 +438,11 @@ bot.on('add_dj', function(data) {
   if (queue.length > 0) {
     if (dj_index === 0) {
       queue.splice(dj_index,1);
-      bot.speak("Give it up for " + format_name(dj) );
+      if (add_dj_responses[dj.toLowerCase()]) {
+        bot.speak(add_dj_responses[dj.toLowerCase()]);
+      } else {
+        bot.speak("Give it up for " + format_name(dj) );
+      }
       cache_queue();
     } else {
       bot.speak("HEY! " + format_name(dj) + ", we don't like it when people cut in line around here! - " + format_name(queue[0]) + " is up next so please step down");
