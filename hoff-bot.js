@@ -426,6 +426,9 @@ bot.on('speak', function (data) {
       bot.speak("Your Jedi mind tricks will not work with me!");
     }
   }
+  else if (text.match(/^transform hoff$/i)) {
+    bot.speak("eep oork wronk wronk....done");
+  }
 });
 
 bot.on('add_dj', function(data) {
