@@ -19,6 +19,9 @@ var is_bopping = false;
 var dj_counts = {};
 var max_djs = 0;
 var recent_visitors = {};
+var current_dj = "";
+var current_dj_list = [];
+var djs = {};
 
 var quotes = shuffle(raw_quotes);
 var bop_responses = shuffle(raw_bop_responses);
@@ -42,8 +45,10 @@ var add_dj_responses = {
   "drcakes" : "Obviously the cake is not a lie because it's now on stage about to spin some tunes",
   "rob usdin" : "'Scotty, Give me all the Rob Usdin you can!'...'Aye Captain, but I don't think she'll take much more!'",
   "emptyjay" : "give it up for Matthew Jami...Matthew Jacki...Matthew Hackis...ahhhh....now I see why you chose EmptyJay",
-  "vj frankie balls" : ":notes: 'Cause he's got the biggest balls of them all! :notes: Give it up for VJ FB!"
-}
+  "vj frankie balls" : ":notes: 'Cause he's got the biggest balls of them all! :notes: Give it up for VJ FB!",
+  "phatdawg" : "Give it up for Phatdawg, looks like he got off of his kayak and found some time to spin a few tunes with us.",
+  "dj j-nick" : "Straight outta the crypt, give a shout out to our resident vampire DJ, DJ J-Nick.  Make sure to cover your necks!"
+};
 
 console.log("started");
 bot.debug = false;
@@ -142,12 +147,33 @@ function stub_out_dj_spots(current_djs) {
   }
 }
 
+function fill_in_djs(dj_list) {
+  console.log(dj_list);
+  dj_list.forEach(function(dj) {
+    if(djs[dj.userid]) {
+      djs[dj.userid].last_bop = Date.now();
+    } else {
+      djs[dj.userid] = {"name" : dj.name, "last_bop": Date.now() };
+    }
+  });
+}
+
+function update_last_bop(user) {
+  if(djs[user.userid]) {
+    djs[user.userid].last_bop = Date.now();
+  }
+}
+
 function format_name(dj_name) {
   if(dj_name[0] === '@') {
     return dj_name;
   } else {
     return '@' + dj_name;
   }
+}
+
+function minutes_ago(minutes) {
+  return (Date.now() - (minutes * 60 * 1000));
 }
 //check if we're still active
 setInterval(function() {
@@ -165,13 +191,33 @@ setInterval(function() {
   
 }, (30 * 1000));
 
+//check the dj stand to make sure they're still there
+setInterval(function() {
+  console.log("running the function");
+  current_dj_list.forEach(function(dj_id) {
+    dj = djs[dj_id];
+    console.log(dj.name + " last bopped at " + dateFormat(dj.last_bop, "HH:MM:ss"));
+    if(minutes_ago(10) > dj.last_bop) {
+      //bot.speak("Hey " + format_name(dj.name) + ", this is your final notice.  You will be escorted down");
+      console.log(dj.name + " is over 10 minutes");
+    } else if ((minutes_ago(8) > dj.last_bop) && (dj.last_bop > minutes_ago(9))) {
+      //bot.speak("Hey " + format_name(dj.name) + ", are you there...HELLO, are we receiving?");
+      console.log(dj.name + " is over 8 minutes");
+    } else if ((minutes_ago(5) > dj.last_bop) && (dj.last_bop > minutes_ago(6))) {
+      //bot.speak("Hey " + format_name(dj.name) + ", we don't like AFK dj'ing.  Please press your 'Awesome' button to let us know you're there");
+      console.log(dj.name + " is over 5 minutes");
+    }
+  });  
+}, (60 * 1000));
 
 bot.on('registered', function (data) {
   time_since_last_activity = Date.now();
   if (data.user[0].userid != process.env.hoffbot_userid) {
-    if(recent_visitors[data.user[0].userid]) { 
-      if(Date.now() - recent_visitors[data.user[0].userid] > (1000 * 60 * 30)) {
-        bot.speak('Hello ' + format_name(data.user[0].name) + ": " + motd);
+    var user = data.user[0];
+    djs[user.userid] = {"name": user.name, "last_bop" : time_since_last_activity };
+    if(recent_visitors[user.userid]) { 
+      if(Date.now() - recent_visitors[user.userid] > (1000 * 60 * 30)) {
+        bot.speak('Hello ' + format_name(user.name) + ": " + motd);
       } else {
         console.log("user must have refreshed");
       }
@@ -213,7 +259,9 @@ bot.on('registered', function (data) {
       try {
         max_djs = data.room.metadata.max_djs;
         moderators = data.room.metadata.moderator_id;
+        fill_in_djs(data.users);
         stub_out_dj_spots(data.room.metadata.djs);
+        current_dj_list = data.room.metadata.djs;
       } catch (e) {
         moderators = [];
       }
@@ -434,10 +482,13 @@ bot.on('speak', function (data) {
 bot.on('add_dj', function(data) {
   time_since_last_activity = Date.now();
   //check to see if the user is in the queue and remove them then
-  dj = data.user[0].name;
+  user = data.user[0];
+  
+  dj = user.name;
   dj_index = queue.indexOf(dj);
-
-  dj_counts[data.user[0].userid] = { name: dj, play_count : 0 };
+  current_dj_list.push(user.userid);
+ 
+  dj_counts[user.userid] = { name: dj, play_count : 0 };
   if (queue.length > 0) {
     if (dj_index === 0) {
       queue.splice(dj_index,1);
@@ -447,6 +498,7 @@ bot.on('add_dj', function(data) {
         bot.speak("Give it up for " + format_name(dj) );
       }
       cache_queue();
+      update_last_bop(user);
     } else {
       bot.speak("HEY! " + format_name(dj) + ", we don't like it when people cut in line around here! - " + format_name(queue[0]) + " is up next so please step down");
     } 
@@ -455,18 +507,22 @@ bot.on('add_dj', function(data) {
 
 bot.on("deregistered", function(data) {
   time_since_last_activity = Date.now();
-  dj = data.user[0].name;
+  user = data.user[0];
+  dj = user.name;
   i = position_in_queue(dj);
   if (i>=0) {
     queue.splice(i,1);
     cache_queue();
   }
-  if (dj_counts[data.user[0].userid]) {
-    delete dj_counts[data.user[0].userid];
+  if (dj_counts[user.userid]) {
+    delete dj_counts[user.userid];
     cache_song_count();
   }
-  recent_visitors[data.user[0].userid] = Date.now();
-
+  recent_visitors[user.userid] = Date.now();
+  delete djs[user.userid];
+  dj_idx = current_dj_list.indexOf(user.userid);
+  if (dj_idx >= 0)
+    current_dj_list.splice(dj_idx,1);
 });
 
 bot.on('newsong', function (data) {
@@ -479,6 +535,7 @@ bot.on('newsong', function (data) {
     bot.bop();
   }
   //update the counts
+  current_dj = song.djid;
   if(dj_counts[song.djid]) {
     dj_counts[song.djid].play_count++;
     dj_counts[song.djid].name = song.djname;
@@ -486,6 +543,7 @@ bot.on('newsong', function (data) {
     dj_counts[song.djid] = {name : song.djname, play_count : 1 }; 
   }
   cache_song_count();
+  current_dj_list = data.room.metadata.djs;
   console.log(rpad(dateFormat(time_since_last_activity, "HH:MM" ),6) + rpad(song.djname,20) + "Started playing: " + song.metadata.song + " - by: " + song.metadata.artist);
 
 });
@@ -496,6 +554,7 @@ bot.on('endsong', function (data) {
   console.log("people waiting: " + people_waiting().toString());
   console.log(queue);
   console.log(dj_counts);
+  console.log(djs);
   var overlimit_djs = [];
   if (people_waiting()) {
     var dj;
@@ -525,4 +584,11 @@ bot.on("rem_dj", function (data) {
     delete dj_counts[data.user[0].userid];
   }
 });
+
+bot.on("update_votes", function (data) {
+  time_since_last_activity = Date.now();
+  userid = data.room.metadata.votelog[0][0];
+  update_last_bop({'userid' : userid});
+});
+
 
