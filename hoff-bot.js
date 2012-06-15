@@ -480,8 +480,12 @@ bot.on('speak', function (data) {
 
   else if (text.match(/^dj counts$/i)) {
     var djid;
+    var index=0;
     for(djid in dj_counts) {
-      bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
+      //bot.speak(dj_counts[djid].play_count + " : " + dj_counts[djid].name);  
+      var message = (dj_counts[djid].play_count + " : " + dj_counts[djid].name );  
+      setTimeout(function(dj) { bot.speak(dj); }, index * 750, message);
+      index++;
     }
   }
 
