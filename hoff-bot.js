@@ -432,6 +432,18 @@ bot.on('speak', function (data) {
     bot.speak("Well, actually everybody loves me, but thanks for saying it out loud");
   }
 
+  else if (text.match(/move next dj to last/i)) {
+    if (isModerator(data.userid)) {
+      if(queue.length == 1) {
+        bot.speak("ummm, ok...voila! They are now at the end of the 1 person queue.");
+      } else {
+        first_dj = queue.shift();
+        queue.push(first_dj);
+        bot.speak(current_queue());
+        cache_queue();
+      }
+    }
+  }
   else if (text.match(/forget the counts hoff/)) {
     if (isModerator(data.userid)) {
       dj_counts = {};
