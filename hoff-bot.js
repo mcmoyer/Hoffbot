@@ -598,15 +598,23 @@ bot.on("rem_dj", function (data) {
   if (queue.length > 0) {
     var name = format_name(queue[0]);
     if (name == "@DJ Groupenfondel") {
-    	bot.speak("Hey " + format_name(queue[0]) + ", it's your turn, ONLY TO PLAY MUSIC -- NOTHING ELSE, on the DJ stand!");
+      bot.speak("Hey " + format_name(queue[0]) + ", it's your turn, ONLY TO PLAY MUSIC -- NOTHING ELSE, on the DJ stand!");
     }
     else { 
-    	bot.speak("Hey " + format_name(queue[0]) + ", it's your turn on the DJ stand!");
+      bot.speak("Hey " + format_name(queue[0]) + ", it's your turn on the DJ stand!");
     }
   }
   if (dj_counts[data.user[0].userid]) {
     delete dj_counts[data.user[0].userid];
   }
+  dj_idx = current_dj_list.indexOf(user.userid);
+  if (dj_idx >= 0)
+    current_dj_list.splice(dj_idx,1);
+});
+
+bot.on("snagged", function (data) {
+  time_since_last_activity = Date.now();
+  console.log("Song Snagged");  
 });
 
 bot.on("update_votes", function (data) {
