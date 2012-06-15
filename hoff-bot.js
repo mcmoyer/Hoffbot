@@ -221,8 +221,13 @@ bot.on('registered', function (data) {
       } else {
         console.log("user must have refreshed");
       }
+    } else if (user.name.match(/_west\d*/)) {
+      //bot.speak("Hi " + data.user[0].name);
+    } else if (user.name.match(/ttstats|ttdashboard/)) { 
+      // don't do a thing
+      console.log('tt bot');
     } else {
-      bot.speak('Hello ' + format_name(data.user[0].name) + ": " + motd);
+      bot.speak('Hello ' + format_name(user.name) + ": " + motd);
     }
   } else {
     bot.modifyProfile({name: "TheHoff"});
