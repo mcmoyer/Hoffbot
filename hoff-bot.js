@@ -322,21 +322,24 @@ bot.on('speak', function (data) {
   }
 
   else if (text.match(/^bop hoff/i)) {
-    if (is_bopping) {
-      bot.speak("If I bopped any harder, my head would fly off!");
-      return false;
+    if (current_dj == data.userid) {
+      bot.speak("I'm really sorry, but I can't help you self gratify yourself");
+    } else {
+      if (is_bopping) {
+        bot.speak("If I bopped any harder, my head would fly off!");
+        return false;
+      }
+      phrase = bop_responses[current_bop_response];
+      current_bop_response++;
+      if (current_bop_response >= bop_responses.length) {
+        bop_responses = shuffle(raw_bop_responses);
+        current_bop_response = 0;
+      }
+      bot.speak(phrase);
+      bot.bop();
+      is_bopping = true;
     }
-    phrase = bop_responses[current_bop_response];
-    current_bop_response++;
-    if (current_bop_response >= bop_responses.length) {
-      bop_responses = shuffle(raw_bop_responses);
-      current_bop_response = 0;
-    }
-    bot.speak(phrase);
-    bot.bop();
-    is_bopping = true;
   }
-
   else if (text.match(/^q[ue]* me hoff/i)) {
     if (queue.indexOf(name) >= 0) {
       bot.speak("Dude, you're already in the queue");
