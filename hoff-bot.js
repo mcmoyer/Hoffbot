@@ -1,4 +1,6 @@
 var Bot    = require('ttapi');
+const dotenv = require('dotenv');
+dotenv.config();
 var raw_quotes = require("./quotes.js");
 var raw_bop_responses = require("./bop_responses.js");
 var raw_insults = require("./insults.js");
@@ -33,21 +35,22 @@ var inactivity_threshold = process.env.hoffbot_idle_timeout;
 var reboot_threshold = process.env.hoffbot_reboot_timeout;
 
 var add_dj_responses = {
-  "mrdiggit" : "Hush everybody, MrDiggit's about to play a record",
+  "604177c2c2dbd9001be75767" : "OMG it's ZAPHOD! Are you going to play more of that Proj Rock?  I'm still trying to understand the last song",      
+  "6042439bc2dbd9001bb341f7" : "Hush everybody, MrDiggit's about to play a record",
   "lord leo" : "Prostrate yourselves heathens!, Lord Leo hath taken to the stage!",
   "housekat" : "Woohoo the fastest trigger finger in TT history has taken the stage...behave now or HouseKat'll boot ya!",
   "mc caveman" : "Dj'ing is so easy, even a caveman can do it!",
   "the lone deranger" : "Who was that masked man anyway Pa? Why son, it's the LONE DERANGER!",
-  "guffy" : "Let's all raise a :beer: for Guffy",
+  "6040fa6a3f4bfc001b27d311" : "Let's all raise a :beer: for Guffy",
   "evil zed" : "Give it up for the man who makes Satan look like the Avon Lady, Eviiiillllll Zeeeeeeeed!",
-  "slappy mcgee" : "Give me an S...Give me an L...Give me an A....oh for god sakes, just give it up for Slappy!",
+  "60424aabc2dbd9001bb344f5" : "Give me an S...Give me an L...Give me an A....oh for god sakes, just give it up for Slappy!",
   "digithead" : "Welcome to the stage Crockett....err, I mean DigitHead",
   "drcakes" : "Obviously the cake is not a lie because it's now on stage about to spin some tunes",
-  "rob usdin" : "'Scotty, Give me all the Rob Usdin you can!'...'Aye Captain, but I don't think she'll take much more!'",
+  "6041708ec2dbd9001be75283" : "'Scotty, Give me all the Rob Usdin you can!'...'Aye Captain, but I don't think she'll take much more!'",
   "emptyjay" : "give it up for Matthew Jami...Matthew Jacki...Matthew Hackis...ahhhh....now I see why you chose EmptyJay",
   "vj frankie balls" : ":notes: 'Cause he's got the biggest balls of them all! :notes: Give it up for VJ FB!",
   "phatdawg" : "Give it up for Phatdawg, looks like he got off of his kayak and found some time to spin a few tunes with us.",
-  "dj j-nick" : "Straight outta the crypt, give a shout out to our resident vampire DJ, DJ J-Nick.  Make sure to cover your necks!"
+  "60414fa1c2dbd9001ad7394d" : "Straight outta the crypt, give a shout out to our resident vampire DJ, DJ J-Nick.  Make sure to cover your necks!"
 };
 
 console.log("started");
@@ -165,7 +168,9 @@ function update_last_bop(user) {
 }
 
 function format_name(dj_name) {
-  if(dj_name[0] === '@') {
+  if(dj_name === null) {
+    return 'someone there?';
+	} else if(dj_name[0] === '@') {
     return dj_name;
   } else {
     return '@' + dj_name;
@@ -193,7 +198,6 @@ setInterval(function() {
 
 //check the dj stand to make sure they're still there
 setInterval(function() {
-  console.log("running the function");
   current_dj_list.forEach(function(dj_id) {
     dj = djs[dj_id];
     console.log(dj.name + " last bopped at " + dateFormat(dj.last_bop, "HH:MM:ss"));
@@ -219,7 +223,7 @@ bot.on('registered', function (data) {
       if(Date.now() - recent_visitors[user.userid] > (1000 * 60 * 30)) {
         bot.speak('Hello ' + format_name(user.name) + ": " + motd);
       } else {
-        console.log("user must have refreshed");
+        console.log(`user must have refreshed - ${user.name}`);
       }
     } else if (user.name.match(/_west\d*/)) {
       //bot.speak("Hi " + data.user[0].name);
@@ -511,13 +515,14 @@ bot.on('add_dj', function(data) {
   dj = user.name;
   dj_index = queue.indexOf(dj);
   current_dj_list.push(user.userid);
- 
+  console.log("add_dj function");
+  console.log(user); 
   dj_counts[user.userid] = { name: dj, play_count : 0 };
   if (queue.length > 0) {
     if (dj_index === 0) {
       queue.splice(dj_index,1);
-      if (add_dj_responses[dj.toLowerCase()]) {
-        bot.speak(add_dj_responses[dj.toLowerCase()]);
+      if (add_dj_responses[user.userid]) {
+        bot.speak(add_dj_responses[user.userid]);
       } else {
         bot.speak("Give it up for " + format_name(dj) );
       }
@@ -594,6 +599,7 @@ bot.on('endsong', function (data) {
 });
 
 bot.on("rem_dj", function (data) {
+	var user = data.user[0];
   time_since_last_activity = Date.now();
   if (queue.length > 0) {
     var name = format_name(queue[0]);
