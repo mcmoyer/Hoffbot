@@ -154,6 +154,7 @@ function minutes_ago(minutes) {
 
 const startAutobop = () => {
   bot.speak("Ok, I might as well be bopping if I'm going to be standing here");
+  bot.bop();
   should_autobop = true;
   autobopTimer = setTimeout(() => {
     should_autobop = false;

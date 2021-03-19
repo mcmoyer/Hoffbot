@@ -2,7 +2,7 @@
  * Shuffles array in place. ES6 version
  * @param {Array} a items An array containing the items.
  */
-function shuffle(a) {
+const shuffle = (a) => {
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]];
@@ -16,8 +16,10 @@ function shuffle(a) {
  * @param count
  * @returns {string}
  */
-function rpad(str, count) {
+const rpad = (str, count) => {
   return ((str + Array(count+1).join(" ")).substr(0,count));
-}
+};
 
-export default {shuffle, rpad}
+
+exports.shuffle = shuffle;
+exports.rpad = rpad;
