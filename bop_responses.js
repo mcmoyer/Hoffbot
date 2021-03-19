@@ -1,10 +1,10 @@
-var bop_responses = [
+const bop_responses = [
   "Sure, but this tune would be much better with my dulcet tones singing it",
   "Hey, being awesome is hard work, but I can take a moment to bop to this",
   "Really?  This tune?  Whatever",
   "Ok, but you've got to promise you'll queue up one of my gems too",
   "I'm kinda busy combing my chest hair, but for you, I'll do it",
-  "Let me put this cheeseburger down first", 
+  "Let me put this cheeseburger down first",
   "Baby, I was born to bop",
   "Can't a man finish a cheeseburger around here?",
   "Pamela Anderson didn't like it when I told her to bop",
@@ -15,8 +15,7 @@ var bop_responses = [
   "I don't always bop, but when I do, I do it with style!",
   "Bop 'till you drop in the hot city, keep on working day and night...oh wait, that's not my song",
   "See that shimmer in my eyes?  That's just for you baby!"
-  
-  ];
+]
 
 module.exports = bop_responses;
 

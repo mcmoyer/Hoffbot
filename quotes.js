@@ -1,4 +1,4 @@
-var quotes = [
+const quotes = [
   "Before long, I'll have my own channel - I'll be like Barney",
   "Getting in shape for this role, which is incredibly demanding, vocally, has been a lot of hard work, but I'm nailing it. I'm even kind of, at times, blowing my own mind, because I am even able to talk right now.",
   "I did, I'd say, at least about 80 percent of the rest of the driving, and I had the time of my life.",
@@ -22,7 +22,7 @@ var quotes = [
   "I've got taste.  It's inbred in me.",
   "I can do some really spiritual stuff about people that are close to me ... you know when they get in trouble with eating or alcohol or whatever comes into your life that you need to address.",
   "Beyond its entertainment value, Baywatch has enriched and, in many cases, helped save lives. I'm looking forward to the opportunity to continue with a project which has had such a significance for so many.",
-  "Despite that I have been going through a painful divorce and I have recently been separated from my children due to my work, I have been successfully dealing with my issues. Unfortunately, one evening I did have a brief relapse, but part of recovery is relapse. Because of my honest and positive relationship with my daughters, who were concerned for my wellbeing, there was a tape made that night to show me what I was like. I have seen the tape. I have learned from it and I am back on my game.",
+  "Despite that I have been going through a painful divorce and I have recently been separated from my children due to my work, I have been successfully dealing with my issues. Unfortunately, one evening I did have a brief relapse, but part of recovery is relapse. Because of my honest and positive relationship with my daughters, who were concerned for my well being, there was a tape made that night to show me what I was like. I have seen the tape. I have learned from it and I am back on my game.",
   "I never fancied Pamela - until recently. I was sitting next to her at a party at the Playboy Mansion and there was loads of chemistry. I though how funny it would be if we hooked up.",
   "You know, I've had an interesting career. I've made a living, talking to a car, running in slow motion with Pamela Anderson, and starring with a sponge. Now, people might say there's no depth to that, but...uh...and they're right... however, it seems to have worked.",
   "I feel like Elvis. Only alive.",
@@ -34,7 +34,7 @@ var quotes = [
   "I look good, but I probably have the insides of Elvis.",
   "I'm delighted to be such a hit on the web and to be crowned king of the internet.",
   "I try to let the ladies gravitate towards me so it doesn't look like I'm trying to jump into bed with them."
-];
+]
 
 module.exports = quotes;
 
